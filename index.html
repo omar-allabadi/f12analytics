@@ -226,6 +226,54 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   font-family: var(--mono); font-size: 11px; color: var(--blue); }
 .chart-card-title { display: flex; align-items: center; }
 
+/* ── Chart expand modal ──────────────────────────────────────────────────── */
+.chart-expand-btn {
+  width: 18px; height: 18px; border-radius: 4px; flex-shrink: 0;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+  color: var(--muted); font-size: 10px; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  line-height: 1; padding: 0; margin-left: auto; flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.chart-expand-btn:hover { background: rgba(79,142,247,0.15); color: var(--blue); border-color: var(--blue); }
+/* Title rows need to be flex so expand btn pushes to far right */
+.chart-card-title { display: flex; align-items: center; width: 100%; }
+.chart-modal-overlay {
+  display: none; position: fixed; inset: 0; z-index: 10000;
+  background: rgba(0,0,0,0.72); backdrop-filter: blur(4px);
+  align-items: center; justify-content: center; padding: 24px;
+}
+.chart-modal-overlay.visible { display: flex; }
+.chart-modal {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 16px; padding: 24px; width: 100%; max-width: 1100px;
+  max-height: 90vh; display: flex; flex-direction: column;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+}
+.chart-modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 20px; flex-shrink: 0;
+}
+.chart-modal-title {
+  font-size: 11px; font-family: var(--mono); color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.09em;
+}
+.chart-modal-close {
+  background: none; border: none; color: var(--muted); font-size: 18px;
+  cursor: pointer; line-height: 1; padding: 4px 8px; border-radius: 6px;
+  transition: color 0.15s; flex-shrink: 0;
+}
+.chart-modal-close:hover { color: var(--text); }
+.chart-modal-body { flex: 1; min-height: 0; position: relative; }
+.chart-modal-canvas-wrap { position: relative; width: 100%; height: 100%; min-height: 400px; }
+.chart-modal-div-wrap { overflow-y: auto; max-height: 70vh; }
+@media(max-width:900px){
+  .chart-modal-overlay { padding: 12px; }
+  .chart-modal { padding: 16px; }
+  .chart-modal-canvas-wrap { min-height: 280px; }
+}
+
 /* MOBILE */
 @media(max-width:900px){
   .header{padding:16px 20px;}
@@ -708,6 +756,7 @@ function mkChart(id, config) {
   const canvas = document.getElementById(id);
   if(!canvas) return;
   charts[id] = new Chart(canvas, config);
+  requestAnimationFrame(() => addExpandBtn(id));
 }
 
 // ── Common line config
@@ -824,6 +873,7 @@ function renderGrowth() {
   renderDOW('dow-fg','followersGained','followers gained',true);
   renderDOW('dow-pv','profileViews','profile views');
   renderSeasonality('dow-seasonality');
+  ['dow-fc','dow-views','dow-fg','dow-pv','dow-seasonality'].forEach(addExpandBtnDiv);
 }
 
 // ─────────────────────────────────────────
@@ -1016,6 +1066,7 @@ function renderEngagement() {
   });
   renderDOW('dow-likes','likes','likes');
   renderDOW('dow-shares','shares','shares');
+  ['dow-likes','dow-shares'].forEach(addExpandBtnDiv);
 
   // Engagement rate over time (daily approximation — saves not in daily data)
   const engRateDaily = d.map(r => {
@@ -1078,6 +1129,7 @@ function renderContent() {
   mkChart('ch-ret-views', scConf);
   renderDOW('dow-ret','avgRetention','retention %',true);
   renderDOW('dow-fyp','fypPct','FYP %',true);
+  ['dow-ret','dow-fyp'].forEach(addExpandBtnDiv);
 
   // Post table — uses renderPostTable for sortable columns
   postSortCol = 'date';
@@ -1678,6 +1730,111 @@ function closeRateDrilldown() {
 
 
 
+// ── Chart expand modal ────────────────────────────────────────────────────────
+let expandedChart = null;
+
+// Called after every mkChart — injects expand button into parent chart-card
+function addExpandBtn(canvasId) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const card = canvas.closest('.chart-card');
+  if (!card || card.querySelector('.chart-expand-btn')) return;
+  // Use the innermost .chart-card-title (handles chart-card-title-row cards too)
+  const titleEl = card.querySelector('.chart-card-title');
+  if (!titleEl) return;
+  const titleText = titleEl.textContent.replace(/\si$/,'').trim();
+  const btn = document.createElement('button');
+  btn.className = 'chart-expand-btn';
+  btn.title = 'Expand chart';
+  btn.innerHTML = '&#x26F6;';
+  btn.onclick = (e) => { e.stopPropagation(); openChartModal(canvasId, titleText); };
+  titleEl.appendChild(btn);
+}
+
+// Also add expand to DOW/div-based chart cards
+function addExpandBtnDiv(divId) {
+  const div = document.getElementById(divId);
+  if (!div) return;
+  const card = div.closest('.chart-card');
+  if (!card || card.querySelector('.chart-expand-btn')) return;
+  const titleEl = card.querySelector('.chart-card-title');
+  if (!titleEl) return;
+  const titleText = titleEl.textContent.replace(/\si$/,'').trim();
+  const btn = document.createElement('button');
+  btn.className = 'chart-expand-btn';
+  btn.title = 'Expand chart';
+  btn.innerHTML = '&#x26F6;';
+  btn.onclick = (e) => { e.stopPropagation(); openDivModal(divId, titleText); };
+  titleEl.appendChild(btn);
+}
+
+function openChartModal(canvasId, title) {
+  const srcChart = charts[canvasId];
+  if (!srcChart) return;
+
+  const overlay = document.getElementById('chart-modal-overlay');
+  const body    = document.getElementById('chart-modal-body');
+  document.getElementById('chart-modal-title').textContent = title;
+
+  // Build modal canvas
+  body.innerHTML = '<div class="chart-modal-canvas-wrap"><canvas id="chart-modal-canvas"></canvas></div>';
+
+  // Destroy previous modal chart
+  if (expandedChart) { expandedChart.destroy(); expandedChart = null; }
+
+  // Reference data and options directly — avoids JSON.stringify which strips
+  // all functions (tooltip callbacks, tick formatters, etc.)
+  const src = srcChart.config;
+  const cfg = {
+    type:    src.type,
+    data:    { labels: src.data.labels, datasets: src.data.datasets },
+    options: src.options,
+  };
+
+  requestAnimationFrame(() => {
+    const canvas = document.getElementById('chart-modal-canvas');
+    if (!canvas) return;
+    expandedChart = new Chart(canvas, cfg);
+  });
+
+  overlay.classList.add('visible');
+  document.body.style.overflow = 'hidden';
+}
+
+function openDivModal(divId, title) {
+  const src = document.getElementById(divId);
+  if (!src) return;
+  const overlay = document.getElementById('chart-modal-overlay');
+  const body    = document.getElementById('chart-modal-body');
+  document.getElementById('chart-modal-title').textContent = title;
+  body.innerHTML = '<div class="chart-modal-div-wrap">' + src.innerHTML + '</div>';
+  overlay.classList.add('visible');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeChartModal(event) {
+  // If clicking overlay background (not modal itself), close
+  if (event && event.target !== document.getElementById('chart-modal-overlay')) return;
+  _doCloseModal();
+}
+// Also allow close button which calls with no event
+const _origClose = closeChartModal;
+function closeChartModal(event) {
+  if (event && event.currentTarget && event.currentTarget.classList.contains('chart-modal-close')) {
+    _doCloseModal(); return;
+  }
+  if (event && event.target !== document.getElementById('chart-modal-overlay')) return;
+  _doCloseModal();
+}
+function _doCloseModal() {
+  document.getElementById('chart-modal-overlay').classList.remove('visible');
+  document.body.style.overflow = '';
+  if (expandedChart) { expandedChart.destroy(); expandedChart = null; }
+}
+// Close on Escape key
+document.addEventListener('keydown', e => { if (e.key === 'Escape') _doCloseModal(); });
+
+
 function renderActive() {
   closeRateDrilldown();
   if(activeTab==='growth')     renderGrowth();
@@ -1727,5 +1884,15 @@ function setPeriod(val) {
 renderGrowth();
 document.getElementById('header-followers').textContent = fmt(DAILY[DAILY.length-1].followers);
 </script>
+<div class="chart-modal-overlay" id="chart-modal-overlay" onclick="closeChartModal(event)">
+  <div class="chart-modal" id="chart-modal">
+    <div class="chart-modal-header">
+      <span class="chart-modal-title" id="chart-modal-title"></span>
+      <button class="chart-modal-close" onclick="closeChartModal()">✕</button>
+    </div>
+    <div class="chart-modal-body" id="chart-modal-body"></div>
+  </div>
+</div>
+
 </body>
 </html>
