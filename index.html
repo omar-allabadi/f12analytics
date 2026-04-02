@@ -81,50 +81,72 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .tag-green{background:var(--green-d);color:var(--green);border:1px solid rgba(62,207,142,0.25);}
 .tag-amber{background:var(--amber-d);color:var(--amber);border:1px solid rgba(245,166,35,0.25);}
 
-/* MOBILE */
-@media(max-width:900px){
-  .header{padding:16px 20px;}
-  .nav{padding:0 16px;}
-  .content{padding:16px 16px 80px;}
-  .kpi-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
-  .chart-grid-2{grid-template-columns:1fr;}
-  .kpi-value{font-size:20px;}
+/* CUSTOM DATE RANGE */
+.custom-range {
+  display: none; align-items: center; gap: 6px; flex-wrap: wrap;
 }
-@media(max-width:500px){
-  .kpi-grid{grid-template-columns:repeat(2,1fr);gap:8px;}
-  .kpi{padding:12px;}
-  .kpi-value{font-size:18px;}
-  .page-title{font-size:17px;}
+.custom-range.visible { display: flex; }
+.custom-range-sep {
+  font-size: 11px; color: var(--muted); font-family: var(--mono);
 }
-
-/* ── Info tooltips ───────────────────────────────────────────────────────── */
-.info-btn {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 15px; height: 15px; border-radius: 50%;
-  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
-  color: var(--muted); font-size: 9px; font-family: var(--mono);
-  cursor: pointer; flex-shrink: 0; margin-left: 6px;
-  line-height: 1; font-weight: 500; vertical-align: middle;
-  transition: background 0.15s, color 0.15s;
-  -webkit-tap-highlight-color: transparent;
-  position: relative;
-}
-.info-btn:hover { background: var(--blue-dim); color: var(--blue); border-color: var(--blue); }
-.info-bubble {
-  display: none; position: fixed; z-index: 9999;
+.date-input {
   background: var(--surface2); border: 1px solid var(--border2);
-  border-radius: 10px; padding: 12px 14px; max-width: 280px; min-width: 200px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-  font-family: var(--sans); font-size: 12px; line-height: 1.6;
-  color: var(--text); pointer-events: none;
+  color: var(--text); font-family: var(--mono); font-size: 12px;
+  padding: 6px 10px; border-radius: 8px; outline: none;
+  min-height: 36px; cursor: pointer; color-scheme: dark;
 }
-.info-bubble.visible { display: block; }
-.info-bubble-title { font-size: 12px; font-weight: 500; color: var(--text); margin-bottom: 5px; }
-.info-bubble-body  { font-size: 12px; color: var(--muted); line-height: 1.6; }
-.info-bubble-formula { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border);
-  font-family: var(--mono); font-size: 11px; color: var(--blue); }
-.chart-card-title { display: flex; align-items: center; }
+.date-input:focus { border-color: var(--blue); }
+.date-apply-btn {
+  background: var(--blue); color: #fff; border: none;
+  font-family: var(--sans); font-size: 12px; font-weight: 500;
+  padding: 6px 12px; border-radius: 8px; cursor: pointer;
+  min-height: 36px; transition: opacity 0.15s;
+}
+.date-apply-btn:hover { opacity: 0.85; }
 
+/* RATE DRILL-DOWN PANEL */
+.rate-drilldown {
+  display: none; margin-bottom: 16px;
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 14px; padding: 20px;
+  animation: fadeSlideIn 0.18s ease;
+}
+.rate-drilldown.visible { display: block; }
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.drilldown-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px;
+}
+.drilldown-title {
+  font-size: 11px; font-family: var(--mono); color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.09em;
+}
+.drilldown-close {
+  background: none; border: none; color: var(--muted); font-size: 16px;
+  cursor: pointer; line-height: 1; padding: 2px 6px; border-radius: 4px;
+  transition: color 0.15s;
+}
+.drilldown-close:hover { color: var(--text); }
+.kpi-expand-row.drillable {
+  cursor: pointer; border-radius: 4px;
+  transition: background 0.12s;
+  margin: 0 -4px; padding: 3px 4px;
+}
+.kpi-expand-row.drillable:hover {
+  background: rgba(255,160,50,0.08);
+}
+.kpi-expand-row.drillable:hover .kpi-expand-label {
+  color: rgba(255,160,50,0.9);
+}
+.drilldown-active .kpi-expand-row.drillable.selected {
+  background: rgba(255,160,50,0.1);
+}
+.drilldown-active .kpi-expand-row.drillable.selected .kpi-expand-label {
+  color: rgba(255,160,50,1);
+}
 
 /* ── CTR toggle ──────────────────────────────────────────────────────────── */
 .ctr-toggle {
@@ -175,6 +197,50 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .kpi-expand-label .info-btn {
   width: 12px; height: 12px; font-size: 8px; margin-left: 4px;
 }
+
+/* ── Info tooltips ───────────────────────────────────────────────────────── */
+.info-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 15px; height: 15px; border-radius: 50%;
+  background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+  color: var(--muted); font-size: 9px; font-family: var(--mono);
+  cursor: pointer; flex-shrink: 0; margin-left: 6px;
+  line-height: 1; font-weight: 500; vertical-align: middle;
+  transition: background 0.15s, color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+}
+.info-btn:hover { background: var(--blue-dim); color: var(--blue); border-color: var(--blue); }
+.info-bubble {
+  display: none; position: fixed; z-index: 9999;
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 10px; padding: 12px 14px; max-width: 280px; min-width: 200px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  font-family: var(--sans); font-size: 12px; line-height: 1.6;
+  color: var(--text); pointer-events: none;
+}
+.info-bubble.visible { display: block; }
+.info-bubble-title { font-size: 12px; font-weight: 500; color: var(--text); margin-bottom: 5px; }
+.info-bubble-body  { font-size: 12px; color: var(--muted); line-height: 1.6; }
+.info-bubble-formula { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border);
+  font-family: var(--mono); font-size: 11px; color: var(--blue); }
+.chart-card-title { display: flex; align-items: center; }
+
+/* MOBILE */
+@media(max-width:900px){
+  .header{padding:16px 20px;}
+  .nav{padding:0 16px;}
+  .content{padding:16px 16px 80px;}
+  .kpi-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
+  .chart-grid-2{grid-template-columns:1fr;}
+  .kpi-value{font-size:20px;}
+}
+@media(max-width:500px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr);gap:8px;}
+  .kpi{padding:12px;}
+  .kpi-value{font-size:18px;}
+  .page-title{font-size:17px;}
+}
 </style>
 </head>
 <body>
@@ -194,13 +260,21 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
       <option value="60">Last 60 days</option>
       <option value="30">Last 30 days</option>
       <option value="7">Last 7 days</option>
+      <option value="custom">Custom range…</option>
     </select>
+    <div class="custom-range" id="custom-range">
+      <input type="date" class="date-input" id="date-start">
+      <span class="custom-range-sep">→</span>
+      <input type="date" class="date-input" id="date-end">
+      <button class="date-apply-btn" onclick="applyCustomRange()">Apply</button>
+    </div>
     <div class="header-stat">
       <div class="hs-label">Current followers</div>
       <div class="hs-value" id="header-followers">—</div>
     </div>
   </div>
 </div>
+
 
 <div class="nav">
   <div class="nav-tab active" onclick="setTab('growth')">Growth</div>
@@ -326,6 +400,13 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   <!-- ── ENGAGEMENT ── -->
   <div class="section" id="sec-engagement">
     <div class="kpi-grid" id="kpi-engagement"></div>
+    <div class="rate-drilldown" id="rate-drilldown">
+      <div class="drilldown-header">
+        <span class="drilldown-title" id="drilldown-title">Rate over time</span>
+        <button class="drilldown-close" onclick="closeRateDrilldown()">✕</button>
+      </div>
+      <div class="chart-wrap" style="height:200px;"><canvas id="ch-rate-drill"></canvas></div>
+    </div>
     <div class="chart-grid-1">
       <div class="chart-card">
         <div class="chart-card-title">Engagement rate over time (%) <button class="info-btn" onclick="showInfo('eng-rate-chart',event)" title="What is this?">i</button></div>
@@ -400,7 +481,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
     <div class="section-sep">Post log — content quality metrics</div>
     <div class="table-wrap">
       <table class="data-table" id="post-table">
-        <thead id="post-log-table"><tr><th data-col="date" style="cursor:pointer;user-select:none;white-space:nowrap;padding:6px 8px;" onclick="sortPostTable('date')">Date<span class="sort-arrow" style="color:var(--faint);font-size:10px;"> ↓</span></th><th data-col="views" style="cursor:pointer;user-select:none;white-space:nowrap;padding:6px 8px;" onclick="sortPostTable('views')">Views<span class="sort-arrow" style="color:var(--faint);font-size:10px;"> ↕</span></th><th data-col="likes" style="cursor:pointer;user-select:none;white-space:nowrap;padding:6px 8px;" onclick="sortPostTable('likes')">Likes<span class="sort-arrow" style="color:var(--faint);font-size:10px;"> ↕</span></th><th data-col="comments" style="cursor:pointer;user-select:none;white-space:nowrap;padding:6px 8px;" onclick="sortPostTable('comments')">Comments<span class="sort-arrow" style="color:var(--faint);font-size:10px;"> ↕</span></th><th data-col="shares" style="cursor:pointer;user-select:none;white-space:nowrap;padding:6px 8px;" onclick="sortPostTable('shares')">Shares<span class="sort-arrow" style="color:var(--faint);font-size:10px;"> ↕</span></th><th data-col="avgRetention" style="cursor:pointer;user-select:none;white-space:nowrap;padding:6px 8px;" onclick="sortPostTable('avgRetention')">Retention<span class="sort-arrow" style="color:var(--faint);font-size:10px;"> ↕</span></th><th data-col="avgWatchTime" style="cursor:pointer;user-select:none;white-space:nowrap;padding:6px 8px;" onclick="sortPostTable('avgWatchTime')">Watch time<span class="sort-arrow" style="color:var(--faint);font-size:10px;"> ↕</span></th><th data-col="fypPct" style="cursor:pointer;user-select:none;white-space:nowrap;padding:6px 8px;" onclick="sortPostTable('fypPct')">FYP %<span class="sort-arrow" style="color:var(--faint);font-size:10px;"> ↕</span></th><th data-col="saves" style="cursor:pointer;user-select:none;white-space:nowrap;padding:6px 8px;" onclick="sortPostTable('saves')">Saves<span class="sort-arrow" style="color:var(--faint);font-size:10px;"> ↕</span></th><th data-col="followersGained" style="cursor:pointer;user-select:none;white-space:nowrap;padding:6px 8px;" onclick="sortPostTable('followersGained')">Followers gained<span class="sort-arrow" style="color:var(--faint);font-size:10px;"> ↕</span></th><th data-col="nonFollowersPct" style="cursor:pointer;user-select:none;white-space:nowrap;padding:6px 8px;" onclick="sortPostTable('nonFollowersPct')">Non-followers<span class="sort-arrow" style="color:var(--faint);font-size:10px;"> ↕</span></th><th style="padding:6px 8px;">Signal</th><th style="padding:6px 8px;">Post</th></tr></thead>
+        <thead id="post-log-table"><tr><th data-col="date" style="cursor:pointer;user-select:none;white-space:nowrap;padding:6px 8px;" onclick="sortPostTable('date')">Date<span class="sort-arrow" style="color:var(--faint);font-size:10px;"> ↓</span></th><th data-col="views" style="cursor:pointer;user-select:none;white-space:nowrap;padding:6px 8px;" onclick="sortPostTable('views')">Views<span class="sort-arrow" style="color:var(--faint);font-size:10px;"> ↕</span></th><th data-col="likes" style="cursor:pointer;user-select:none;white-space:nowrap;padding:6px 8px;" onclick="sortPostTable('likes')">Likes<span class="sort-arrow" style="color:var(--faint);font-size:10px;"> ↕</span></th><th data-col="comments" style="cursor:pointer;user-select:none;white-space:nowrap;padding:6px 8px;" onclick="sortPostTable('comments')">Comments<span class="sort-arrow" style="color:var(--faint);font-size:10px;"> ↕</span></th><th data-col="shares" style="cursor:pointer;user-select:none;white-space:nowrap;padding:6px 8px;" onclick="sortPostTable('shares')">Shares<span class="sort-arrow" style="color:var(--faint);font-size:10px;"> ↕</span></th><th data-col="saves" style="cursor:pointer;user-select:none;white-space:nowrap;padding:6px 8px;" onclick="sortPostTable('saves')">Saves<span class="sort-arrow" style="color:var(--faint);font-size:10px;"> ↕</span></th><th data-col="avgRetention" style="cursor:pointer;user-select:none;white-space:nowrap;padding:6px 8px;" onclick="sortPostTable('avgRetention')">Retention<span class="sort-arrow" style="color:var(--faint);font-size:10px;"> ↕</span></th><th data-col="engagementRate" style="cursor:pointer;user-select:none;white-space:nowrap;padding:6px 8px;" onclick="sortPostTable('engagementRate')">Eng. rate<span class="sort-arrow" style="color:var(--faint);font-size:10px;"> ↕</span></th><th data-col="fypPct" style="cursor:pointer;user-select:none;white-space:nowrap;padding:6px 8px;" onclick="sortPostTable('fypPct')">FYP %<span class="sort-arrow" style="color:var(--faint);font-size:10px;"> ↕</span></th><th data-col="followersGained" style="cursor:pointer;user-select:none;white-space:nowrap;padding:6px 8px;" onclick="sortPostTable('followersGained')">Followers gained<span class="sort-arrow" style="color:var(--faint);font-size:10px;"> ↕</span></th><th data-col="nonFollowersPct" style="cursor:pointer;user-select:none;white-space:nowrap;padding:6px 8px;" onclick="sortPostTable('nonFollowersPct')">Non-followers<span class="sort-arrow" style="color:var(--faint);font-size:10px;"> ↕</span></th><th style="padding:6px 8px;">Signal</th><th style="padding:6px 8px;">Post</th></tr></thead>
         <tbody id="post-table-body"></tbody>
       </table>
     </div>
@@ -553,6 +634,24 @@ function fmt(n, d=0)  { if(n==null||isNaN(n)) return '—'; return (+n).toLocale
 function fmtP(n,d=1)  { if(n==null||isNaN(n)) return '—'; return (+n*100).toFixed(d)+'%'; }
 function fmtPraw(n,d=1){ if(n==null||isNaN(n)) return '—'; return (+n).toFixed(d)+'%'; }
 function avg(arr)      { const v=arr.filter(x=>x!=null&&!isNaN(x)); return v.length?v.reduce((a,b)=>a+b,0)/v.length:null; }
+
+// ── Average trend line dataset (injected into line/bar charts)
+function avgLineDataset(data, label) {
+  const vals = data.filter(x => x != null && !isNaN(x));
+  const mean = vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null;
+  return {
+    label: label || 'Average',
+    data: data.map(() => mean != null ? +mean.toFixed(4) : null),
+    borderColor: 'rgba(255,160,50,0.75)',
+    backgroundColor: 'transparent',
+    borderWidth: 1.5,
+    borderDash: [5, 4],
+    pointRadius: 0,
+    tension: 0,
+    fill: false,
+    order: 0,
+  };
+}
 function sum(arr)      { return arr.filter(x=>x!=null&&!isNaN(x)).reduce((a,b)=>a+b,0); }
 function mx(arr)       { const v=arr.filter(x=>x!=null&&!isNaN(x)); return v.length?Math.max(...v):null; }
 
@@ -566,16 +665,41 @@ function deltaClass(cur,prev) {
   return cur>=prev?'up':'down';
 }
 
+// ── Custom range state
+let customStart = null;
+let customEnd   = null;
+
 // ── Filter data by period
 function getDaily() {
   if(period==='all') return DAILY;
+  if(period==='custom' && customStart && customEnd) {
+    return DAILY.filter(r => r.date >= customStart && r.date <= customEnd);
+  }
   const n = parseInt(period);
   return DAILY.slice(-n);
 }
 function getPosts() {
   if(period==='all') return POSTS;
-  const cutoff = getDaily()[0].date;
-  return POSTS.filter(p=>p.date>=cutoff);
+  const d = getDaily();
+  if(!d.length) return [];
+  const cutoff = d[0].date;
+  const ceiling = d[d.length-1].date;
+  return POSTS.filter(p => p.date >= cutoff && p.date <= ceiling);
+}
+
+function applyCustomRange() {
+  const s = document.getElementById('date-start').value;
+  const e = document.getElementById('date-end').value;
+  if(!s || !e) return;
+  if(s > e) {
+    // swap silently if start is after end
+    customStart = e; customEnd = s;
+    document.getElementById('date-start').value = e;
+    document.getElementById('date-end').value   = s;
+  } else {
+    customStart = s; customEnd = e;
+  }
+  renderActive();
 }
 
 // ── Destroy & recreate chart
@@ -692,7 +816,8 @@ function renderGrowth() {
     v=>fmt(v)));
 
   mkChart('ch-f1k', lineConf(tl,
-    [{label:'Followers / 1K views', data:d.map(r=>r.f1kViews), borderColor:'#a78bfa', backgroundColor:'rgba(167,139,250,0.08)', fill:true, tension:0.3, pointRadius:0, borderWidth:2}],
+    [{label:'Followers / 1K views', data:d.map(r=>r.f1kViews), borderColor:'#a78bfa', backgroundColor:'rgba(167,139,250,0.08)', fill:true, tension:0.3, pointRadius:0, borderWidth:2},
+      avgLineDataset(d.map(r=>r.f1kViews),'Avg')],
     v=>v==null?'':v.toFixed(2)));
   renderDOW('dow-fc','followerChange','followers gained');
   renderDOW('dow-views','views','views');
@@ -732,7 +857,8 @@ function renderReach() {
     v=>v>=1e9?+(v/1e9).toFixed(2)+'B':v>=1e6?+(v/1e6).toFixed(2)+'M':v>=1e3?+(v/1e3).toFixed(0)+'K':fmt(v)));
 
   mkChart('ch-views', lineConf(tl,
-    [{label:'Views', data:d.map(r=>r.views), borderColor:'#4f8ef7', backgroundColor:'rgba(79,142,247,0.08)', fill:true, tension:0.3, pointRadius:0, borderWidth:2}],
+    [{label:'Views', data:d.map(r=>r.views), borderColor:'#4f8ef7', backgroundColor:'rgba(79,142,247,0.08)', fill:true, tension:0.3, pointRadius:0, borderWidth:2},
+      avgLineDataset(d.map(r=>r.views),'Avg')],
     v=>v>=1e6?+(v/1e6).toFixed(1)+'M':v>=1e3?+(v/1e3).toFixed(0)+'K':fmt(v)));
 
   mkChart('ch-viewers', lineConf(tl,
@@ -743,13 +869,15 @@ function renderReach() {
     v=>v>=1e3?+(v/1e3).toFixed(0)+'K':fmt(v)));
 
   mkChart('ch-nvshare', lineConf(tl,
-    [{label:'New viewer share', data:d.map(r=>r.newViewerShare!=null?+(r.newViewerShare*100).toFixed(1):null), borderColor:'#f5a623', backgroundColor:'rgba(245,166,35,0.08)', fill:true, tension:0.3, pointRadius:0, borderWidth:2}],
+    [{label:'New viewer share', data:d.map(r=>r.newViewerShare!=null?+(r.newViewerShare*100).toFixed(1):null), borderColor:'#f5a623', backgroundColor:'rgba(245,166,35,0.08)', fill:true, tension:0.3, pointRadius:0, borderWidth:2},
+      avgLineDataset(d.map(r=>r.newViewerShare!=null?+(r.newViewerShare*100).toFixed(1):null),'Avg')],
     v=>v+'%'));
 }
 
 // ─────────────────────────────────────────
 // FUNNEL
 // ─────────────────────────────────────────
+
 function renderFunnel() {
   ctrMode = 'all';     // reset toggles on re-render
   nvConvMode = 'profile';
@@ -773,12 +901,14 @@ function renderFunnel() {
     v=>fmt(v)));
 
   mkChart('ch-ctr', lineConf(tl,
-    [{label:'CTR %', data:d.map(r=>r.ctr!=null?+(r.ctr*100).toFixed(3):null), borderColor:'#2dd4bf', backgroundColor:'rgba(45,212,191,0.08)', fill:true, tension:0.3, pointRadius:0, borderWidth:2}],
+    [{label:'CTR %', data:d.map(r=>r.ctr!=null?+(r.ctr*100).toFixed(3):null), borderColor:'#2dd4bf', backgroundColor:'rgba(45,212,191,0.08)', fill:true, tension:0.3, pointRadius:0, borderWidth:2},
+      avgLineDataset(d.map(r=>r.ctr!=null?+(r.ctr*100).toFixed(3):null),'Avg')],
     v=>v+'%'));
 
   const convCapped = d.map(r=>r.conversion!=null&&r.conversion<=1?+(r.conversion*100).toFixed(1):null);
   mkChart('ch-conv', lineConf(tl,
-    [{label:'Conversion %', data:convCapped, borderColor:'#3ecf8e', backgroundColor:'rgba(62,207,142,0.08)', fill:true, tension:0.3, pointRadius:0, borderWidth:2}],
+    [{label:'Conversion %', data:convCapped, borderColor:'#3ecf8e', backgroundColor:'rgba(62,207,142,0.08)', fill:true, tension:0.3, pointRadius:0, borderWidth:2},
+      avgLineDataset(convCapped,'Avg')],
     v=>v+'%'));
 
   const scatter = d.filter(r=>r.ctr!=null&&r.conversion!=null&&r.conversion<=1)
@@ -826,34 +956,34 @@ function renderEngagement() {
       { label: 'Median / day', value: fmt(med(likesDaily),0),                                         tip: 'expand-med-day' },
       { label: 'Avg / post',   value: fmt(avg(p.map(r=>r.likes).filter(x=>x!=null)),0),               tip: 'expand-avg-post' },
       { label: 'Best day',     value: fmt(mx(likesDaily),0),                                          tip: 'expand-best-day' },
-      { label: 'Like rate',    value: fmtPraw((likeRate||0)*100,3),                                   tip: 'expand-like-rate' },
+      { label: 'Like rate',    value: fmtPraw((likeRate||0)*100,3),                                   tip: 'expand-like-rate',    drill: {key:'like',    label:'Like rate over time'} },
     ], 'total-likes') +
     expandableKPI('kpi-shares', 'Total shares', fmt(totShares), [
       { label: 'Avg / day',    value: fmt(avg(sharesDaily),0),                                        tip: 'expand-avg-day' },
       { label: 'Median / day', value: fmt(med(sharesDaily),0),                                        tip: 'expand-med-day' },
       { label: 'Avg / post',   value: fmt(avg(p.map(r=>r.shares).filter(x=>x!=null)),1),              tip: 'expand-avg-post' },
       { label: 'Best day',     value: fmt(mx(sharesDaily),0),                                         tip: 'expand-best-day' },
-      { label: 'Share rate',   value: fmtPraw((shareRate||0)*100,3),                                  tip: 'expand-share-rate' },
+      { label: 'Share rate',   value: fmtPraw((shareRate||0)*100,3),                                  tip: 'expand-share-rate',   drill: {key:'share',   label:'Share rate over time'} },
     ], 'total-shares') +
     expandableKPI('kpi-comments', 'Total comments', fmt(totComments), [
       { label: 'Avg / day',    value: fmt(avg(commDaily),0),                                          tip: 'expand-avg-day' },
       { label: 'Median / day', value: fmt(med(commDaily),0),                                          tip: 'expand-med-day' },
       { label: 'Avg / post',   value: fmt(avg(p.map(r=>r.comments).filter(x=>x!=null)),1),            tip: 'expand-avg-post' },
       { label: 'Best day',     value: fmt(mx(commDaily),0),                                           tip: 'expand-best-day' },
-      { label: 'Comment rate', value: fmtPraw((commentRate||0)*100,3),                                tip: 'expand-comment-rate' },
+      { label: 'Comment rate', value: fmtPraw((commentRate||0)*100,3),                                tip: 'expand-comment-rate', drill: {key:'comment', label:'Comment rate over time'} },
     ], 'total-comments') +
     expandableKPI('kpi-saves', 'Total saves', fmt(totSaves), [
       { label: 'Avg / post',   value: fmt(avg(savesPost),1),                                          tip: 'expand-avg-post' },
       { label: 'Median / post',value: fmt(med(savesPost),0),                                          tip: 'expand-med-post' },
       { label: 'Best post',    value: fmt(mx(savesPost),0),                                           tip: 'expand-best-post' },
-      { label: 'Save rate',    value: fmtPraw((avg(p.map(r=>r.saveRate).filter(x=>x!=null))||0)*100,3), tip: 'expand-save-rate' },
+      { label: 'Save rate',    value: fmtPraw((avg(p.map(r=>r.saveRate).filter(x=>x!=null))||0)*100,3), tip: 'expand-save-rate',    drill: {key:'save',    label:'Save rate over time'} },
     ], 'total-saves') +
     expandableKPI('kpi-eng-rate', 'Avg engagement rate', fmtPraw((avgEngRate||0)*100,2), [
       { label: 'Median / post',  value: fmtPraw((medEngRate||0)*100,2),  tip: 'expand-med-post' },
       { label: 'Best post',      value: fmtPraw((bestEngRate||0)*100,2), tip: 'expand-best-post' },
-      { label: 'Like rate',      value: fmtPraw((likeRate||0)*100,3),    tip: 'expand-like-rate' },
-      { label: 'Share rate',     value: fmtPraw((shareRate||0)*100,3),   tip: 'expand-share-rate' },
-      { label: 'Comment rate',   value: fmtPraw((commentRate||0)*100,3), tip: 'expand-comment-rate' },
+      { label: 'Like rate',      value: fmtPraw((likeRate||0)*100,3),    tip: 'expand-like-rate',    drill: {key:'like',    label:'Like rate over time'} },
+      { label: 'Share rate',     value: fmtPraw((shareRate||0)*100,3),   tip: 'expand-share-rate',   drill: {key:'share',   label:'Share rate over time'} },
+      { label: 'Comment rate',   value: fmtPraw((commentRate||0)*100,3), tip: 'expand-comment-rate', drill: {key:'comment', label:'Comment rate over time'} },
     ], 'eng-rate-kpi');
 
   mkChart('ch-likes', barConf(tl,
@@ -881,7 +1011,7 @@ function renderEngagement() {
     options:{
       responsive:true, maintainAspectRatio:false,
       plugins:{legend:{position:'right', labels:{boxWidth:10,boxHeight:10,padding:10,color:'#7a7f8a',font:{size:11}}},
-        tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${fmt(ctx.parsed)}`}}}
+        tooltip:{callbacks:{label:ctx=>{const total=ctx.dataset.data.reduce((a,b)=>a+b,0);const pct=total>0?(ctx.parsed/total*100).toFixed(1):'0';return ` ${ctx.label}: ${fmt(ctx.parsed)} (${pct}%)`;}}}}
     }
   });
   renderDOW('dow-likes','likes','likes');
@@ -896,7 +1026,8 @@ function renderEngagement() {
   mkChart('ch-eng-rate', lineConf(d.map(r=>shortDate(r.date)),
     [{label:'Engagement rate %', data:engRateDaily,
       borderColor:'#f5a623', backgroundColor:'rgba(245,166,35,0.08)',
-      fill:true, tension:0.3, pointRadius:0, borderWidth:2}],
+      fill:true, tension:0.3, pointRadius:0, borderWidth:2},
+      avgLineDataset(engRateDaily,'Avg')],
     v => v+'%'));
 }
 function renderContent() {
@@ -1090,7 +1221,7 @@ function renderPostTable() {
       case 'comments':       return r.comments || 0;
       case 'shares':         return r.shares || 0;
       case 'avgRetention':   return r.avgRetention || 0;
-      case 'avgWatchTime':   return r.avgWatchTime || 0;
+      case 'engagementRate': return r.views>0?((r.likes||0)+(r.shares||0)+(r.comments||0))/r.views:0;
       case 'fypPct':         return r.fypPct || 0;
       case 'saves':          return r.saves || 0;
       case 'followersGained':return r.followersGained || 0;
@@ -1134,10 +1265,10 @@ function renderPostTable() {
       <td>${r.likes>=1e3?+(r.likes/1e3).toFixed(0)+'K':fmt(r.likes)}</td>
       <td>${fmt(r.comments)}</td>
       <td>${fmt(r.shares)}</td>
-      <td style="color:${retOk?'#3ecf8e':'#f07060'}">${r.avgRetention!=null?r.avgRetention.toFixed(1)+'%':'—'}</td>
-      <td>${r.avgWatchTime!=null?r.avgWatchTime.toFixed(1)+'s':'—'}</td>
-      <td>${r.fypPct!=null?(r.fypPct*100).toFixed(1)+'%':'—'}</td>
       <td>${fmt(r.saves)}</td>
+      <td style="color:${retOk?'#3ecf8e':'#f07060'}">${r.avgRetention!=null?r.avgRetention.toFixed(1)+'%':'—'}</td>
+      <td>${r.views>0?(((r.likes||0)+(r.shares||0)+(r.comments||0))/r.views*100).toFixed(2)+'%':'—'}</td>
+      <td>${r.fypPct!=null?(r.fypPct*100).toFixed(1)+'%':'—'}</td>
       <td style="color:${r.followersGained>50?'#3ecf8e':'inherit'}">${fmt(r.followersGained)}</td>
       <td>${r.nonFollowersPct!=null?fmtPraw(r.nonFollowersPct*100,0):'—'}</td>
       <td>${signal}</td>
@@ -1381,7 +1512,8 @@ function setCTRMode(mode) {
   mkChart('ch-ctr', lineConf(d.map(r=>shortDate(r.date)),
     [{label: chartLabel, data: ctrChartData, borderColor:'#2dd4bf',
       backgroundColor:'rgba(45,212,191,0.08)', fill:true, tension:0.3,
-      pointRadius:0, borderWidth:2}],
+      pointRadius:0, borderWidth:2},
+      avgLineDataset(ctrChartData, 'Avg')],
     v => v+'%'));
 }
 
@@ -1429,7 +1561,8 @@ function setNVConvMode(mode) {
   mkChart('ch-conv', lineConf(d.map(r=>shortDate(r.date)),
     [{label: chartLabel, data: chartData, borderColor:'#3ecf8e',
       backgroundColor:'rgba(62,207,142,0.08)', fill:true, tension:0.3,
-      pointRadius:0, borderWidth:2}],
+      pointRadius:0, borderWidth:2},
+      avgLineDataset(chartData, 'Avg')],
     v => v+'%'));
 }
 
@@ -1447,12 +1580,15 @@ function toggleKPI(id) {
 }
 
 function expandableKPI(id, label, mainValue, expandRows, infoId) {
-  const rowsHTML = expandRows.map(r =>
-    `<div class="kpi-expand-row">
-      <span class="kpi-expand-label">${r.label}${r.tip ? infoBtn(r.tip) : ''}</span>
+  const rowsHTML = expandRows.map(r => {
+    const isDrillable = !!r.drill;
+    const drillAttr   = isDrillable ? ` onclick="showRateDrilldown('${r.drill.key}','${r.drill.label}',event)"` : '';
+    const cls         = isDrillable ? ' drillable' : '';
+    return `<div class="kpi-expand-row${cls}"${drillAttr}>
+      <span class="kpi-expand-label">${r.label}${r.tip ? infoBtn(r.tip) : ''}${isDrillable ? '<span style="font-size:9px;opacity:0.4;margin-left:5px;">↗ chart</span>' : ''}</span>
       <span class="kpi-expand-value">${r.value}</span>
-    </div>`
-  ).join('');
+    </div>`;
+  }).join('');
 
   return `<div class="kpi expandable" id="${id}" onclick="toggleKPI('${id}')">
     <div class="kpi-label">${label}${infoId ? infoBtn(infoId) : ''}</div>
@@ -1462,7 +1598,88 @@ function expandableKPI(id, label, mainValue, expandRows, infoId) {
   </div>`;
 }
 
+// ── Rate drill-down chart ─────────────────────────────────────────────────────
+let activeDrillKey = null;
+
+function showRateDrilldown(key, label, event) {
+  event.stopPropagation(); // don't collapse the KPI card
+
+  const panel = document.getElementById('rate-drilldown');
+  const d     = getDaily();
+  const p     = getPosts();
+
+  // Toggle off if same metric clicked again
+  if (activeDrillKey === key && panel.classList.contains('visible')) {
+    closeRateDrilldown();
+    return;
+  }
+  activeDrillKey = key;
+
+  // Mark selected row, clear others
+  document.querySelectorAll('.kpi-expand-row.drillable').forEach(el => el.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+
+  // Mark parent KPI grid as drilldown-active (for CSS selected styling)
+  document.querySelectorAll('.kpi-grid').forEach(g => g.classList.remove('drilldown-active'));
+  const grid = document.getElementById('kpi-engagement');
+  if (grid) grid.classList.add('drilldown-active');
+
+  // Build data series
+  let data, color, yFmt;
+  if (key === 'like') {
+    data  = d.map(r => r.views > 0 ? +((r.likes||0) / r.views * 100).toFixed(4) : null);
+    color = '#f07060'; yFmt = v => v + '%';
+  } else if (key === 'share') {
+    data  = d.map(r => r.views > 0 ? +((r.shares||0) / r.views * 100).toFixed(4) : null);
+    color = '#4f8ef7'; yFmt = v => v + '%';
+  } else if (key === 'comment') {
+    data  = d.map(r => r.views > 0 ? +((r.comments||0) / r.views * 100).toFixed(4) : null);
+    color = '#3ecf8e'; yFmt = v => v + '%';
+  } else if (key === 'save') {
+    // Daily save rate: average saveRate across posts on each day
+    const byDate = {};
+    p.forEach(post => {
+      if (!byDate[post.date]) byDate[post.date] = [];
+      if (post.saveRate != null) byDate[post.date].push(post.saveRate);
+    });
+    data  = d.map(r => {
+      const vals = byDate[r.date];
+      return vals && vals.length ? +(vals.reduce((a,b)=>a+b,0)/vals.length * 100).toFixed(4) : null;
+    });
+    color = '#f5a623'; yFmt = v => v + '%';
+  }
+
+  const labels = d.map(r => shortDate(r.date));
+
+  document.getElementById('drilldown-title').textContent = label;
+  panel.classList.add('visible');
+
+  mkChart('ch-rate-drill', lineConf(labels,
+    [{
+      label, data,
+      borderColor: color,
+      backgroundColor: color.replace(')', ', 0.08)').replace('rgb', 'rgba'),
+      fill: true, tension: 0.3, pointRadius: 0, borderWidth: 2
+    },
+    avgLineDataset(data, 'Avg')],
+    yFmt
+  ));
+}
+
+function closeRateDrilldown() {
+  activeDrillKey = null;
+  document.getElementById('rate-drilldown').classList.remove('visible');
+  document.querySelectorAll('.kpi-expand-row.drillable').forEach(el => el.classList.remove('selected'));
+  document.querySelectorAll('.kpi-grid').forEach(g => g.classList.remove('drilldown-active'));
+  if (charts['ch-rate-drill']) { charts['ch-rate-drill'].destroy(); delete charts['ch-rate-drill']; }
+}
+
+
+
+
+
 function renderActive() {
+  closeRateDrilldown();
   if(activeTab==='growth')     renderGrowth();
   else if(activeTab==='reach') renderReach();
   else if(activeTab==='funnel') renderFunnel();
@@ -1481,6 +1698,28 @@ function setTab(tab) {
 
 function setPeriod(val) {
   period = val;
+  const rangeEl = document.getElementById('custom-range');
+  if(val === 'custom') {
+    rangeEl.classList.add('visible');
+    // Set bounds to actual data range
+    const minDate = DAILY[0].date;
+    const maxDate = DAILY[DAILY.length-1].date;
+    const startEl = document.getElementById('date-start');
+    const endEl   = document.getElementById('date-end');
+    startEl.min = minDate; startEl.max = maxDate;
+    endEl.min   = minDate; endEl.max   = maxDate;
+    // Default to last 30 days within data
+    if(!customStart) {
+      startEl.value = DAILY.length>=30 ? DAILY[DAILY.length-30].date : minDate;
+      endEl.value   = maxDate;
+    } else {
+      startEl.value = customStart;
+      endEl.value   = customEnd;
+    }
+    // Don't render until Apply is clicked
+    return;
+  }
+  rangeEl.classList.remove('visible');
   renderActive();
 }
 
