@@ -506,14 +506,26 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
         <div class="chart-wrap" style="height:190px;"><canvas id="ch-fyp"></canvas></div>
       </div>
     </div>
-    <div class="chart-grid-2">
+
+    <div class="chart-grid-1">
       <div class="chart-card">
-        <div class="chart-card-title">Avg watch time per post (seconds) <button class="info-btn" onclick="showInfo('wt-chart',event)" title="What is this?">i</button></div>
-        <div class="chart-wrap" style="height:190px;"><canvas id="ch-wt"></canvas></div>
+        <div class="chart-card-title">Retention · FYP % · Followers gained (bubble) <button class="info-btn" onclick="showInfo('bubble-chart',event)" title="What is this?">i</button></div>
+        <div class="chart-wrap" style="height:280px;"><canvas id="ch-bubble"></canvas></div>
       </div>
+    </div>
+    <div class="chart-grid-1">
       <div class="chart-card">
-        <div class="chart-card-title">Retention vs views (scatter) <button class="info-btn" onclick="showInfo('ret-views-scatter',event)" title="What is this?">i</button></div>
-        <div class="chart-wrap" style="height:190px;"><canvas id="ch-ret-views"></canvas></div>
+        <div class="chart-card-title-row">
+          <div class="chart-card-title">Performance by posting time <button class="info-btn" onclick="showInfo('post-time-chart',event)" title="What is this?">i</button></div>
+          <div class="ctr-toggle" id="posttime-toggle">
+            <button class="posttime-btn ctr-toggle-btn active" data-metric="fypPct"        onclick="setPostTimeMetric('fypPct')">FYP %</button>
+            <button class="posttime-btn ctr-toggle-btn"        data-metric="avgRetention"  onclick="setPostTimeMetric('avgRetention')">Retention</button>
+            <button class="posttime-btn ctr-toggle-btn"        data-metric="followersGained" onclick="setPostTimeMetric('followersGained')">Followers</button>
+            <button class="posttime-btn ctr-toggle-btn"        data-metric="views"          onclick="setPostTimeMetric('views')">Views</button>
+          </div>
+        </div>
+        <div class="chart-wrap" style="height:240px;"><canvas id="ch-posttime"></canvas></div>
+        <div id="posttime-sample" style="display:flex;gap:16px;margin-top:10px;flex-wrap:wrap;"></div>
       </div>
     </div>
     <div class="chart-grid-2">
@@ -590,8 +602,8 @@ const TOOLTIPS = {
   'best-view-post':      { title: `Best viewed post`, body: `The single post with the most total views in the selected period. Usually a viral or FYP-amplified post. The date shown is when it was posted.`, formula: `Max(Views) across posts · date shown is posting date` },
   'ret-chart':           { title: `Avg retention % per post`, body: `Each bar shows the retention percentage for an individual post. Green bars are above the 10% threshold TikTok uses as a distribution gate. Red bars are below it and likely received limited distribution.`, formula: `AvgWatchTime ÷ Duration × 100 · per post · scraper data` },
   'fyp-chart':           { title: `FYP % per post`, body: `The share of each post views that came from the For You Page. Brighter blue bars are FYP-amplified posts (≥87.3%). A cluster of bright bars means the algorithm has been consistently rewarding recent content.`, formula: `Post FYP_Percent · scraper data` },
-  'wt-chart':            { title: `Avg watch time per post (seconds)`, body: `How many seconds viewers watched each post on average. Longer videos with high absolute watch time often outperform shorter videos with high percentage retention because they demonstrate deeper viewer commitment.`, formula: `Post AvgWatchTime in seconds · scraper data` },
-  'ret-views-scatter':   { title: `Retention vs views (scatter)`, body: `Each dot is a post. The X axis is retention percentage; the Y axis is total views. Posts in the top-right corner combine high retention with high views — these are your benchmark posts.`, formula: `X: AvgRetention % · Y: Views · per post` },
+  'bubble-chart':      { title: 'Retention · FYP% · Followers gained (bubble)', body: 'Each bubble is a post. X axis = retention %, Y axis = FYP %, bubble size = followers gained. A bubble in the top-right that is large means the post had high retention, strong algorithmic amplification, and converted well to followers — the ideal combination. Small bubbles in the top-right means the algorithm pushed it but followers did not convert. Large bubbles bottom-left means followers came despite weak content signals.', formula: 'X: AvgRetention% · Y: FYP% · Size: FollowersGained · per post' },
+  'post-time-chart':   { title: 'Performance by posting time', body: 'Compares average performance across four posting time windows. Toggle between FYP%, Retention, Followers gained, and Save rate. Each bar shows the average for posts published in that window. Sample size (shown below the chart) matters — buckets with fewer than 5 posts should be interpreted cautiously.', formula: 'Posts grouped by PostTime into Morning (6am–12pm), Afternoon (12pm–6pm), Evening (6pm–10pm), Late Night (10pm–6am) · averages per bucket' },
   'dow-ret':             { title: `Avg retention % by day posted`, body: `Of posts published on each day of the week, what was the average retention percentage. Helps identify whether posting on certain days correlates with better content performance.`, formula: `Mean(post AvgRetention) grouped by day of week posted` },
   'dow-fyp':             { title: `Avg FYP % by day posted`, body: `Of posts published on each day of the week, what share of their views came from the For You Page on average. A high FYP day means the algorithm tends to amplify content posted on that day more aggressively.`, formula: `Mean(post FYP_Percent) grouped by day of week posted` },
   'best-ret-post':       { title: `Best retention post`, body: `The single post with the highest average retention percentage in the selected period. High retention posts are most likely to receive ongoing algorithmic distribution — TikTok rewards content that keeps viewers watching.`, formula: `Max(AvgRetention) across posts in period · date shown is posting date` },
@@ -1117,16 +1129,12 @@ function renderContent() {
       borderRadius:2}],
     v=>v+'%'));
 
-  mkChart('ch-wt', barConf(tl,
-    [{label:'Avg watch time (s)', data:p.map(r=>r.avgWatchTime!=null?+r.avgWatchTime.toFixed(1):null),
-      backgroundColor:'rgba(167,139,250,0.65)', borderRadius:2}],
-    v=>v+'s'));
 
-  const scatter = p.filter(r=>r.avgRetention!=null&&r.views!=null)
-    .map(r=>({x:+r.avgRetention.toFixed(1), y:r.views}));
-  const scConf = scatterConf(scatter,'Retention (%)','Views');
-  scConf.options.scales.y.ticks = { callback: v=>v>=1e6?+(v/1e6).toFixed(1)+'M':v>=1e3?+(v/1e3).toFixed(0)+'K':v };
-  mkChart('ch-ret-views', scConf);
+
+  // Bubble chart
+  renderBubbleChart(p);
+  postTimePosts = p;
+  setPostTimeMetric(postTimeMetric);
   renderDOW('dow-ret','avgRetention','retention %',true);
   renderDOW('dow-fyp','fypPct','FYP %',true);
   ['dow-ret','dow-fyp'].forEach(addExpandBtnDiv);
@@ -1833,6 +1841,231 @@ function _doCloseModal() {
 }
 // Close on Escape key
 document.addEventListener('keydown', e => { if (e.key === 'Escape') _doCloseModal(); });
+
+
+
+// ── Bubble chart: Retention × FYP% × Followers gained ───────────────────────
+function renderBubbleChart(p) {
+  const posts = p.filter(r =>
+    r.avgRetention != null && r.fypPct != null && r.followersGained != null
+  );
+  if (!posts.length) return;
+
+  // Bubble radius: scale followersGained to a readable range (4–28px)
+  const maxFG   = Math.max(...posts.map(r => r.followersGained));
+  const minFG   = Math.min(...posts.map(r => r.followersGained));
+  const range   = maxFG - minFG || 1;
+  const rMin    = 4, rMax = 28;
+  const radius  = fg => rMin + ((fg - minFG) / range) * (rMax - rMin);
+
+  // Color by FYP amplification threshold (≥87.3% = amplified)
+  const data = posts.map(r => ({
+    x: +r.avgRetention.toFixed(1),
+    y: +(r.fypPct * 100).toFixed(1),
+    r: +radius(r.followersGained).toFixed(1),
+    _followers: r.followersGained,
+    _date:      r.date,
+    _url:       r.url || null,
+  }));
+
+  const ampData  = data.filter((_, i) => posts[i].fypPct >= 0.873);
+  const baseData = data.filter((_, i) => posts[i].fypPct <  0.873);
+
+  if (charts['ch-bubble']) { charts['ch-bubble'].destroy(); delete charts['ch-bubble']; }
+  const canvas = document.getElementById('ch-bubble');
+  if (!canvas) return;
+
+  charts['ch-bubble'] = new Chart(canvas, {
+    type: 'bubble',
+    data: {
+      datasets: [
+        {
+          label:           'FYP amplified (≥87.3%)',
+          data:            ampData,
+          backgroundColor: 'rgba(79,142,247,0.55)',
+          borderColor:     'rgba(79,142,247,0.85)',
+          borderWidth:     1,
+        },
+        {
+          label:           'Not amplified',
+          data:            baseData,
+          backgroundColor: 'rgba(122,127,138,0.35)',
+          borderColor:     'rgba(122,127,138,0.6)',
+          borderWidth:     1,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'nearest', intersect: true },
+      onClick: (evt, elements) => {
+        if (!elements.length) return;
+        const pt = elements[0];
+        const ds = charts['ch-bubble'].data.datasets[pt.datasetIndex];
+        const d  = ds.data[pt.index];
+        if (d._url) window.open(d._url, '_blank', 'noopener');
+      },
+      onHover: (evt, elements) => {
+        evt.native.target.style.cursor = elements.length ? 'pointer' : 'default';
+      },
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+          labels: { boxWidth: 10, boxHeight: 10, padding: 14, color: '#7a7f8a' },
+        },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const d = ctx.raw;
+              return [
+                ` Date: ${d._date}`,
+                ` Retention: ${d.x}%`,
+                ` FYP %: ${d.y}%`,
+                ` Followers gained: ${fmt(d._followers)}`,
+                d._url ? ' Click to open post ↗' : '',
+              ].filter(Boolean);
+            },
+          },
+        },
+      },
+      scales: {
+        x: {
+          title:  { display: true, text: 'Avg retention %', color: '#7a7f8a' },
+          grid:   { color: 'rgba(255,255,255,0.04)' },
+          ticks:  { callback: v => v + '%', maxTicksLimit: 7 },
+        },
+        y: {
+          title:  { display: true, text: 'FYP %', color: '#7a7f8a' },
+          grid:   { color: 'rgba(255,255,255,0.04)' },
+          ticks:  { callback: v => v + '%', maxTicksLimit: 6 },
+          min: 0, max: 105,
+        },
+      },
+    },
+  });
+
+  // Add expand button manually (bubble chart uses direct Chart construction)
+  requestAnimationFrame(() => addExpandBtn('ch-bubble'));
+}
+
+
+// ── Post timing analysis ──────────────────────────────────────────────────────
+let postTimeMetric = 'fypPct';
+let postTimePosts  = [];
+
+const POST_TIME_BUCKETS = [
+  { key: 'morning',   label: 'Morning',    start:  6, end: 12, color: 'rgba(245,166,35,0.75)'  },
+  { key: 'afternoon', label: 'Afternoon',  start: 12, end: 18, color: 'rgba(167,139,250,0.75)' },
+  { key: 'evening',   label: 'Evening',    start: 18, end: 22, color: 'rgba(79,142,247,0.75)'  },
+  { key: 'latenight', label: 'Late Night', start: 22, end:  6, color: 'rgba(45,212,191,0.75)'  },
+];
+
+function getTimeBucket(postTime) {
+  if (!postTime) return null;
+  const parts = postTime.split(':');
+  const hour  = parseInt(parts[0]);
+  if (isNaN(hour)) return null;
+  if (hour >= 6  && hour < 12) return 'morning';
+  if (hour >= 12 && hour < 18) return 'afternoon';
+  if (hour >= 18 && hour < 22) return 'evening';
+  return 'latenight';
+}
+
+function setPostTimeMetric(metric) {
+  postTimeMetric = metric;
+  document.querySelectorAll('.posttime-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.metric === metric);
+  });
+
+  const p = postTimePosts;
+  if (!p || !p.length) return;
+
+  // Group posts by bucket
+  const bucketData = {};
+  POST_TIME_BUCKETS.forEach(b => { bucketData[b.key] = []; });
+
+  p.forEach(r => {
+    const bucket = getTimeBucket(r.postTime);
+    if (!bucket) return;
+    let val = null;
+    if      (metric === 'fypPct')         val = r.fypPct         != null ? r.fypPct * 100        : null;
+    else if (metric === 'avgRetention')   val = r.avgRetention   != null ? r.avgRetention         : null;
+    else if (metric === 'followersGained')val = r.followersGained!= null ? r.followersGained      : null;
+    else if (metric === 'views')          val = r.views          != null ? r.views                 : null;
+    if (val != null) bucketData[bucket].push(val);
+  });
+
+  const labels  = POST_TIME_BUCKETS.map(b => b.label);
+  const means   = POST_TIME_BUCKETS.map(b => {
+    const vals = bucketData[b.key];
+    return vals.length ? +(vals.reduce((a,v) => a+v, 0) / vals.length).toFixed(3) : null;
+  });
+  const colors  = POST_TIME_BUCKETS.map(b => b.color);
+  const counts  = POST_TIME_BUCKETS.map(b => bucketData[b.key].length);
+
+  // Y axis label + formatter
+  let yLabel, yFmt;
+  if (metric === 'fypPct')          { yLabel = 'Avg FYP %';            yFmt = v => v.toFixed(1) + '%'; }
+  else if (metric === 'avgRetention'){ yLabel = 'Avg retention %';     yFmt = v => v.toFixed(1) + '%'; }
+  else if (metric === 'followersGained'){ yLabel = 'Avg followers gained'; yFmt = v => fmt(Math.round(v)); }
+  else if (metric === 'views')      { yLabel = 'Avg views';              yFmt = v => v >= 1e6 ? (v/1e6).toFixed(1)+'M' : v >= 1e3 ? (v/1e3).toFixed(0)+'K' : fmt(Math.round(v)); }
+
+  mkChart('ch-posttime', {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label:           yLabel,
+        data:            means,
+        backgroundColor: colors,
+        borderRadius:    4,
+        borderSkipped:   false,
+      }],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const val  = ctx.parsed.y;
+              const cnt  = counts[ctx.dataIndex];
+              return [
+                ` ${yLabel}: ${val != null ? yFmt(val) : '—'}`,
+                ` Posts in bucket: ${cnt}${cnt < 5 ? '  ⚠ low sample' : ''}`,
+              ];
+            },
+          },
+        },
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#7a7f8a' } },
+        y: {
+          grid:  { color: 'rgba(255,255,255,0.04)' },
+          ticks: { callback: yFmt, maxTicksLimit: 5 },
+          title: { display: true, text: yLabel, color: '#7a7f8a' },
+        },
+      },
+    },
+  });
+
+  // Sample size row below chart
+  const sampleEl = document.getElementById('posttime-sample');
+  if (sampleEl) {
+    sampleEl.innerHTML = POST_TIME_BUCKETS.map((b, i) => {
+      const n     = counts[i];
+      const warn  = n < 5 ? ' style="color:var(--amber);"' : '';
+      return `<span style="font-size:10px;font-family:var(--mono);color:var(--muted);">
+        <span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${b.color};margin-right:4px;vertical-align:middle;"></span>
+        ${b.label}: <span${warn}>${n} post${n !== 1 ? 's' : ''}${n < 5 ? ' ⚠' : ''}</span>
+      </span>`;
+    }).join('');
+  }
+}
 
 
 function renderActive() {
