@@ -212,7 +212,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 }
 .info-btn:hover { background: var(--blue-dim); color: var(--blue); border-color: var(--blue); }
 .info-bubble {
-  display: none; position: fixed; z-index: 9999;
+  display: none; position: fixed; z-index: 10002;
   background: var(--surface2); border: 1px solid var(--border2);
   border-radius: 10px; padding: 12px 14px; max-width: 280px; min-width: 200px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.4);
@@ -640,6 +640,8 @@ function showInfo(id, event) {
 
   const bubble = document.createElement('div');
   bubble.className = 'info-bubble visible';
+  // Stop clicks on the bubble itself from closing the modal
+  bubble.addEventListener('click', e => e.stopPropagation());
   bubble.innerHTML = `
     <div class="info-bubble-title">${tip.title}</div>
     <div class="info-bubble-body">${tip.body}</div>
@@ -669,9 +671,12 @@ function showInfo(id, event) {
   bubble.style.top  = top  + 'px';
 }
 
-// Close bubble on any click outside
-document.addEventListener('click', () => {
-  if(activeBubble) { activeBubble.remove(); activeBubble = null; }
+// Close bubble on any click outside (but not on the bubble itself)
+document.addEventListener('click', (e) => {
+  if(activeBubble && !activeBubble.contains(e.target)) {
+    activeBubble.remove();
+    activeBubble = null;
+  }
 });
 
 function infoBtn(id) {
@@ -1747,15 +1752,17 @@ function addExpandBtn(canvasId) {
   if (!canvas) return;
   const card = canvas.closest('.chart-card');
   if (!card || card.querySelector('.chart-expand-btn')) return;
-  // Use the innermost .chart-card-title (handles chart-card-title-row cards too)
   const titleEl = card.querySelector('.chart-card-title');
   if (!titleEl) return;
   const titleText = titleEl.textContent.replace(/\si$/,'').trim();
+  // Capture infoId from existing info-btn if present
+  const existingInfo = titleEl.querySelector('.info-btn');
+  const infoId = existingInfo ? existingInfo.getAttribute('onclick').match(/'([^']+)'/)?.[1] : null;
   const btn = document.createElement('button');
   btn.className = 'chart-expand-btn';
   btn.title = 'Expand chart';
   btn.innerHTML = '&#x26F6;';
-  btn.onclick = (e) => { e.stopPropagation(); openChartModal(canvasId, titleText); };
+  btn.onclick = (e) => { e.stopPropagation(); openChartModal(canvasId, titleText, infoId); };
   titleEl.appendChild(btn);
 }
 
@@ -1768,21 +1775,25 @@ function addExpandBtnDiv(divId) {
   const titleEl = card.querySelector('.chart-card-title');
   if (!titleEl) return;
   const titleText = titleEl.textContent.replace(/\si$/,'').trim();
+  const existingInfo = titleEl.querySelector('.info-btn');
+  const infoId = existingInfo ? existingInfo.getAttribute('onclick').match(/'([^']+)'/)?.[1] : null;
   const btn = document.createElement('button');
   btn.className = 'chart-expand-btn';
   btn.title = 'Expand chart';
   btn.innerHTML = '&#x26F6;';
-  btn.onclick = (e) => { e.stopPropagation(); openDivModal(divId, titleText); };
+  btn.onclick = (e) => { e.stopPropagation(); openDivModal(divId, titleText, infoId); };
   titleEl.appendChild(btn);
 }
 
-function openChartModal(canvasId, title) {
+function openChartModal(canvasId, title, infoId) {
   const srcChart = charts[canvasId];
   if (!srcChart) return;
 
-  const overlay = document.getElementById('chart-modal-overlay');
-  const body    = document.getElementById('chart-modal-body');
-  document.getElementById('chart-modal-title').textContent = title;
+  const overlay   = document.getElementById('chart-modal-overlay');
+  const body      = document.getElementById('chart-modal-body');
+  const titleEl   = document.getElementById('chart-modal-title');
+  titleEl.textContent = title;
+  if (infoId) titleEl.innerHTML += infoBtn(infoId);
 
   // Build modal canvas
   body.innerHTML = '<div class="chart-modal-canvas-wrap"><canvas id="chart-modal-canvas"></canvas></div>';
@@ -1809,12 +1820,14 @@ function openChartModal(canvasId, title) {
   document.body.style.overflow = 'hidden';
 }
 
-function openDivModal(divId, title) {
+function openDivModal(divId, title, infoId) {
   const src = document.getElementById(divId);
   if (!src) return;
   const overlay = document.getElementById('chart-modal-overlay');
   const body    = document.getElementById('chart-modal-body');
-  document.getElementById('chart-modal-title').textContent = title;
+  const titleEl = document.getElementById('chart-modal-title');
+  titleEl.textContent = title;
+  if (infoId) titleEl.innerHTML += infoBtn(infoId);
   body.innerHTML = '<div class="chart-modal-div-wrap">' + src.innerHTML + '</div>';
   overlay.classList.add('visible');
   document.body.style.overflow = 'hidden';
