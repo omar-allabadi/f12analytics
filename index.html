@@ -1122,17 +1122,49 @@ function renderContent() {
     `<div class="kpi"><div class="kpi-label">Avg non-follower %${infoBtn('avg-non-follower')}</div><div class="kpi-value">${fmtPraw((avg(p.map(r=>r.nonFollowersPct).filter(x=>x!=null))||0)*100,1)}</div><div class="kpi-sub">discovery reach · per post</div>${trendTag(p.map(r=>r.nonFollowersPct))}</div>` +
     `<div class="kpi"><div class="kpi-label">Avg follower %${infoBtn('avg-follower-pct')}</div><div class="kpi-value">${fmtPraw(((1-(avg(p.map(r=>r.nonFollowersPct).filter(x=>x!=null))||1)))*100,1)}</div><div class="kpi-sub">existing fans · per post</div></div>`;
 
-  mkChart('ch-ret', barConf(tl,
+  const retUrls = p.map(r => r.url || null);
+  const retConf = barConf(tl,
     [{label:'Avg retention %', data:p.map(r=>r.avgRetention!=null?+r.avgRetention.toFixed(1):null),
       backgroundColor:p.map(r=>r.avgRetention!=null&&r.avgRetention>=10?'rgba(62,207,142,0.7)':'rgba(240,112,96,0.55)'),
       borderRadius:2}],
-    v=>v+'%'));
+    v=>v+'%');
+  retConf.options.onClick = (evt, els) => {
+    if (!els.length) return;
+    const url = retUrls[els[0].index];
+    if (url) window.open(url, '_blank', 'noopener');
+  };
+  retConf.options.onHover = (evt, els) => {
+    evt.native.target.style.cursor = (els.length && retUrls[els[0].index]) ? 'pointer' : 'default';
+  };
+  retConf.options.plugins.tooltip.callbacks = {
+    label: ctx => {
+      const url = retUrls[ctx.dataIndex];
+      return [` Retention: ${ctx.parsed.y}%`, url ? ' Click to open post ↗' : ''].filter(Boolean);
+    },
+  };
+  mkChart('ch-ret', retConf);
 
-  mkChart('ch-fyp', barConf(tl,
+  const fypUrls = p.map(r => r.url || null);
+  const fypConf = barConf(tl,
     [{label:'FYP %', data:p.map(r=>r.fypPct!=null?+(r.fypPct*100).toFixed(1):null),
       backgroundColor:p.map(r=>r.fypPct!=null&&r.fypPct>=0.873?'rgba(79,142,247,0.8)':'rgba(79,142,247,0.35)'),
       borderRadius:2}],
-    v=>v+'%'));
+    v=>v+'%');
+  fypConf.options.onClick = (evt, els) => {
+    if (!els.length) return;
+    const url = fypUrls[els[0].index];
+    if (url) window.open(url, '_blank', 'noopener');
+  };
+  fypConf.options.onHover = (evt, els) => {
+    evt.native.target.style.cursor = (els.length && fypUrls[els[0].index]) ? 'pointer' : 'default';
+  };
+  fypConf.options.plugins.tooltip.callbacks = {
+    label: ctx => {
+      const url = fypUrls[ctx.dataIndex];
+      return [` FYP %: ${ctx.parsed.y}%`, url ? ' Click to open post ↗' : ''].filter(Boolean);
+    },
+  };
+  mkChart('ch-fyp', fypConf);
 
 
 
