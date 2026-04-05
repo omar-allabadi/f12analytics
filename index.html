@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<title>False 12 Plus — Performance Dashboard</title>
+<title>False 12 Plus — Analytics</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
@@ -81,6 +81,74 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 .tag-blue{background:var(--blue-d);color:var(--blue);border:1px solid rgba(79,142,247,0.25);}
 .tag-green{background:var(--green-d);color:var(--green);border:1px solid rgba(62,207,142,0.25);}
 .tag-amber{background:var(--amber-d);color:var(--amber);border:1px solid rgba(245,166,35,0.25);}
+
+/* ── Smart Insights panels ───────────────────────────────────────────────── */
+.si-meta-bar {
+  border-bottom: 1px solid var(--border);
+  padding: 0 36px;
+  overflow: hidden;
+  max-height: 44px;
+  transition: max-height 0.3s ease;
+}
+.si-meta-bar.open { max-height: 800px; }
+.si-meta-trigger {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 0; cursor: pointer; user-select: none;
+}
+.si-meta-spark { font-size: 13px; opacity: 0.6; }
+.si-meta-label {
+  font-size: 11px; font-family: var(--mono); color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.08em;
+  transition: color 0.15s;
+}
+.si-meta-trigger:hover .si-meta-label { color: var(--amber); }
+.si-meta-trigger:hover .si-meta-spark { opacity: 1; }
+.si-meta-chevron {
+  margin-left: auto; font-size: 10px; color: var(--muted);
+  transition: transform 0.25s;
+}
+.si-meta-bar.open .si-meta-chevron { transform: rotate(180deg); }
+.si-meta-body { padding-bottom: 18px; }
+.si-panel {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 11px; padding: 14px 16px; margin-bottom: 14px;
+  font-size: 12px; line-height: 1.75; color: var(--text);
+}
+.si-panel-ts {
+  font-size: 10px; font-family: var(--mono); color: var(--muted);
+  margin-top: 8px;
+}
+.si-bullet { color: var(--amber); font-weight: 600; }
+.si-tab-bar {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 11px; padding: 0; margin-bottom: 16px;
+  overflow: hidden;
+}
+.si-tab-trigger {
+  display: flex; align-items: center; gap: 8px;
+  padding: 11px 16px; cursor: pointer; user-select: none;
+  border-bottom: 1px solid transparent;
+  transition: background 0.15s;
+}
+.si-tab-trigger:hover { background: var(--surface2); }
+.si-tab-bar.open .si-tab-trigger { border-bottom-color: var(--border); }
+.si-tab-label {
+  font-size: 10px; font-family: var(--mono); color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.08em;
+}
+.si-tab-spark { font-size: 12px; opacity: 0.55; }
+.si-tab-trigger:hover .si-tab-label { color: var(--amber); }
+.si-tab-trigger:hover .si-tab-spark { opacity: 1; }
+.si-tab-chevron {
+  margin-left: auto; font-size: 10px; color: var(--muted);
+  transition: transform 0.25s;
+}
+.si-tab-bar.open .si-tab-chevron { transform: rotate(180deg); }
+.si-tab-body { padding: 14px 16px 16px; display: none; }
+.si-tab-bar.open .si-tab-body { display: block; }
+@media(max-width:900px){
+  .si-meta-bar { padding: 0 16px; }
+}
 
 /* CUSTOM DATE RANGE */
 .custom-range {
@@ -298,9 +366,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
   <div class="header-left">
     <div class="logo-dot"></div>
     <div>
-      <div class="brand">False 12 Plus</div>
-      <div class="page-title">Performance Dashboard</div>
-      <div class="last-updated" id="last-updated">Last updated: Apr 5, 2026, 12:53 PM EDT</div>
+      <div class="brand">False 12 Media</div>
+      <div class="page-title">Analytics</div>
+      <div class="last-updated" id="last-updated">Last updated: Apr 5, 2026, 01:21 PM EDT</div>
     </div>
   </div>
   <div class="header-right">
@@ -326,6 +394,18 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 </div>
 
 
+<div class="si-meta-bar" id="si-meta-bar">
+  <div class="si-meta-trigger" onclick="toggleSiMeta()">
+    <span class="si-meta-spark">✦</span>
+    <span class="si-meta-label">Smart Insights — General Analysis</span>
+    <span class="si-meta-chevron">▾</span>
+  </div>
+  <div class="si-meta-body">
+    <div class="si-panel" id="si-meta-content"><strong>Biggest Opportunity</strong><br><span class="si-bullet">•</span> Meta-analysis temporarily unavailable.<br><br><strong>Biggest Bottleneck</strong><br><span class="si-bullet">•</span> Meta-analysis temporarily unavailable.</div>
+    <div class="si-panel-ts">Generated Apr 5, 2026, 01:21 PM ET</div>
+  </div>
+</div>
+
 <div class="nav">
   <div class="nav-tab active" onclick="setTab('growth')">Growth</div>
   <div class="nav-tab" onclick="setTab('reach')">Reach</div>
@@ -338,6 +418,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 
   <!-- ── GROWTH ── -->
   <div class="section active" id="sec-growth">
+    <div class="si-tab-bar" id="si-growth"><div class="si-tab-trigger" onclick="toggleSiTab('si-growth')"><span class="si-tab-spark">✦</span><span class="si-tab-label">Smart Insights — Growth</span><span class="si-tab-chevron">▾</span></div><div class="si-tab-body"><div class="si-panel"><span class="si-bullet">•</span> Insights temporarily unavailable.</div><div class="si-panel-ts">Generated Apr 5, 2026, 01:21 PM ET</div></div></div>
     <div class="kpi-grid" id="kpi-growth"></div>
     <div class="chart-grid-1">
       <div class="chart-card">
@@ -385,6 +466,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 
   <!-- ── REACH ── -->
   <div class="section" id="sec-reach">
+    <div class="si-tab-bar" id="si-reach"><div class="si-tab-trigger" onclick="toggleSiTab('si-reach')"><span class="si-tab-spark">✦</span><span class="si-tab-label">Smart Insights — Reach</span><span class="si-tab-chevron">▾</span></div><div class="si-tab-body"><div class="si-panel"><span class="si-bullet">•</span> Insights temporarily unavailable.</div><div class="si-panel-ts">Generated Apr 5, 2026, 01:21 PM ET</div></div></div>
     <div class="kpi-grid" id="kpi-reach"></div>
     <div class="chart-grid-1">
       <div class="chart-card">
@@ -412,6 +494,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 
   <!-- ── FUNNEL ── -->
   <div class="section" id="sec-funnel">
+    <div class="si-tab-bar" id="si-funnel"><div class="si-tab-trigger" onclick="toggleSiTab('si-funnel')"><span class="si-tab-spark">✦</span><span class="si-tab-label">Smart Insights — Funnel</span><span class="si-tab-chevron">▾</span></div><div class="si-tab-body"><div class="si-panel"><span class="si-bullet">•</span> Insights temporarily unavailable.</div><div class="si-panel-ts">Generated Apr 5, 2026, 01:21 PM ET</div></div></div>
     <div class="kpi-grid" id="kpi-funnel"></div>
     <div class="chart-grid-2">
       <div class="chart-card">
@@ -449,6 +532,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 
   <!-- ── ENGAGEMENT ── -->
   <div class="section" id="sec-engagement">
+    <div class="si-tab-bar" id="si-engagement"><div class="si-tab-trigger" onclick="toggleSiTab('si-engagement')"><span class="si-tab-spark">✦</span><span class="si-tab-label">Smart Insights — Engagement</span><span class="si-tab-chevron">▾</span></div><div class="si-tab-body"><div class="si-panel"><span class="si-bullet">•</span> Insights temporarily unavailable.</div><div class="si-panel-ts">Generated Apr 5, 2026, 01:21 PM ET</div></div></div>
     <div class="kpi-grid" id="kpi-engagement"></div>
     <div class="rate-drilldown" id="rate-drilldown">
       <div class="drilldown-header">
@@ -497,6 +581,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 
   <!-- ── CONTENT QUALITY ── -->
   <div class="section" id="sec-content">
+    <div class="si-tab-bar" id="si-content"><div class="si-tab-trigger" onclick="toggleSiTab('si-content')"><span class="si-tab-spark">✦</span><span class="si-tab-label">Smart Insights — Content Quality</span><span class="si-tab-chevron">▾</span></div><div class="si-tab-body"><div class="si-panel"><span class="si-bullet">•</span> Insights temporarily unavailable.</div><div class="si-panel-ts">Generated Apr 5, 2026, 01:21 PM ET</div></div></div>
     <div class="kpi-grid" id="kpi-content"></div>
     <div class="chart-grid-2">
       <div class="chart-card">
@@ -2112,6 +2197,15 @@ function setPostTimeMetric(metric) {
       </span>`;
     }).join('');
   }
+}
+
+
+// ── Smart Insights toggles ────────────────────────────────────────────────────
+function toggleSiMeta() {
+  document.getElementById('si-meta-bar').classList.toggle('open');
+}
+function toggleSiTab(id) {
+  document.getElementById(id).classList.toggle('open');
 }
 
 
