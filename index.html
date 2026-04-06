@@ -161,19 +161,51 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
 
 /* ── Content Intelligence tab ───────────────────────────────────────────── */
 .ci-ts {
-  font-size:10px; font-family:var(--mono); color:var(--muted); margin-bottom:16px;
+  font-size:10px; font-family:var(--mono); color:var(--muted); margin-bottom:20px;
 }
 .ci-brief-title {
-  font-size:10px; font-family:var(--mono); color:var(--amber);
-  text-transform:uppercase; letter-spacing:0.08em; margin-bottom:12px;
+  font-size:10px; font-family:var(--mono); color:var(--muted);
+  text-transform:uppercase; letter-spacing:0.09em; margin-bottom:14px;
 }
-.ci-brief {
-  background:var(--surface2); border:1px solid var(--border);
-  border-radius:10px; padding:16px 18px;
-  font-size:12px; line-height:1.9; color:var(--text);
+/* Individual story cards */
+.ci-story {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:12px; padding:14px 16px; margin-bottom:10px;
+  display:flex; gap:12px; align-items:flex-start;
+  transition:border-color 0.15s;
 }
-.ci-bullet { color:var(--amber); font-weight:600; }
-.ci-empty  { font-size:11px; color:var(--muted); padding:10px 0; }
+.ci-story:hover { border-color:var(--border2); }
+.ci-story-left { flex-shrink:0; display:flex; flex-direction:column; gap:6px; align-items:center; min-width:36px; }
+.ci-story-num {
+  font-size:16px; font-weight:700; font-family:var(--mono);
+  color:var(--blue); line-height:1;
+}
+.ci-story-body { flex:1; min-width:0; }
+.ci-story-text {
+  font-size:12px; line-height:1.75; color:var(--text); margin-bottom:8px;
+}
+.ci-story-tags { display:flex; flex-wrap:wrap; gap:5px; }
+/* Source tags reuse existing .tag classes */
+.ci-src-tag {
+  font-size:9px; padding:1px 6px; border-radius:4px;
+  font-family:var(--mono); font-weight:600; letter-spacing:0.04em;
+  display:inline-flex; align-items:center; gap:3px;
+}
+.ci-src-reddit  { background:rgba(255,110,60,0.12); color:#ff6e3c; border:1px solid rgba(255,110,60,0.25); }
+.ci-src-youtube { background:rgba(255,50,50,0.12);  color:#ff3232; border:1px solid rgba(255,50,50,0.25); }
+.ci-src-football{ background:var(--green-d); color:var(--green); border:1px solid rgba(62,207,142,0.25); }
+.ci-src-news    { background:var(--blue-d);  color:var(--blue);  border:1px solid rgba(79,142,247,0.25); }
+.ci-src-trends  { background:var(--amber-d); color:var(--amber); border:1px solid rgba(245,166,35,0.25); }
+/* Heat indicator */
+.ci-heat {
+  font-size:8px; font-family:var(--mono); font-weight:700;
+  letter-spacing:0.06em; text-transform:uppercase;
+  padding:2px 5px; border-radius:3px;
+}
+.ci-heat-hot  { background:rgba(240,112,96,0.15); color:var(--coral); border:1px solid rgba(240,112,96,0.3); }
+.ci-heat-warm { background:var(--amber-d); color:var(--amber); border:1px solid rgba(245,166,35,0.25); }
+.ci-heat-cool { background:var(--surface2); color:var(--muted); border:1px solid var(--border); }
+.ci-empty { font-size:11px; color:var(--muted); padding:10px 0; }
 
 /* CUSTOM DATE RANGE */
 .custom-range {
@@ -665,9 +697,88 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14
       <div class="card-title" style="margin-bottom:4px;">Content Intelligence</div>
       <div style="font-size:11px;color:var(--muted);margin-bottom:16px;">Powered by API-Football · Google Trends · Reddit · Gemini</div>
       %%CI_PANEL_START%%
-<div class="ci-ts">Updated Apr 5, 2026, 10:28 PM ET · Synthesized from API-Football · Google Trends · Reddit · YouTube</div>
-<div class="ci-brief-title">✦ What's Trending Right Now</div>
-<div class="ci-brief"><span class="ci-bullet">•</span> Real Madrid suffered a shock 2-1 defeat to Mallorca in La Liga, a result that's sparking significant debate among fans on r/soccer, with many questioning the team's consistency.<br><span class="ci-bullet">•</span> The dramatic 2-2 draw between West Ham and Leeds United in the FA Cup, featuring a 96th-minute equalizer from Axel Disasi, is dominating discussion on r/PremierLeague, with fans debating whether those who left early missed the best part.<br><span class="ci-bullet">•</span> A heartwarming moment from r/soccer shows Ibai Aguirre, a 19-year-old Real Sociedad debutant, being greeted by friends upon returning home, highlighting a feel-good story in the league.<br><span class="ci-bullet">•</span> The Bundesliga is seeing huge engagement on YouTube with highlights of a wild 9-goal thriller between Bayer Leverkusen and VFL Wolfsburg, showcasing a comeback victory for Leverkusen.<br><span class="ci-bullet">•</span> With Arsenal sitting atop the Premier League, their upcoming fixture against Bournemouth is generating anticipation, though their FA Cup match against Southampton is also being discussed on r/PremierLeague.<br><span class="ci-bullet">•</span> The ongoing discussion about Mohamed Salah's perceived decline is a prominent topic on r/PremierLeague, with fans debating his current form and impact.<br><span class="ci-bullet">•</span> A viral YouTube video showcasing "The Best Premier League Goals So Far In 2026" is capturing attention, suggesting a strong interest in individual brilliance and spectacular strikes.<br><span class="ci-bullet">•</span> The looming Premier League clash between struggling West Ham (#18) and rock-bottom Wolverhampton (#20) is being framed as a crucial relegation battle, with significant pressure on both sides.</div>
+<div class="ci-ts">Updated Apr 5, 2026, 10:41 PM ET · Sources: API-Football · Reddit · YouTube · News RSS · Google Trends</div>
+<div class="ci-brief-title">What's Trending Right Now</div>
+<div class="ci-story">
+      <div class="ci-story-left">
+        <div class="ci-story-num">01</div>
+        <span class="ci-heat ci-heat-hot">🔥 Hot</span>
+      </div>
+      <div class="ci-story-body">
+        <div class="ci-story-text"><strong>Arsenal Faces Bournemouth Amidst Title Race Pressure</strong><br>Arsenal, currently leading the Premier League, hosts a struggling Bournemouth side. This fixture presents a crucial opportunity for Arsenal to solidify their title aspirations, while Bournemouth fights to avoid relegation.</div>
+        <div class="ci-story-tags"><span class="ci-src-tag ci-src-football">Fixtures/Results</span><span class="ci-src-tag ci-src-news">News</span></div>
+      </div>
+    </div>
+<div class="ci-story">
+      <div class="ci-story-left">
+        <div class="ci-story-num">02</div>
+        <span class="ci-heat ci-heat-hot">🔥 Hot</span>
+      </div>
+      <div class="ci-story-body">
+        <div class="ci-story-text"><strong>Dortmund vs. Leverkusen: Bundesliga Clash of Titans</strong><br>Second-placed Dortmund faces sixth-placed Leverkusen in a high-stakes Bundesliga encounter. This match could significantly impact the European qualification spots and showcase some of Germany's top talent.</div>
+        <div class="ci-story-tags"><span class="ci-src-tag ci-src-football">Fixtures/Results</span><span class="ci-src-tag ci-src-news">News</span></div>
+      </div>
+    </div>
+<div class="ci-story">
+      <div class="ci-story-left">
+        <div class="ci-story-num">03</div>
+        <span class="ci-heat ci-heat-hot">🔥 Hot</span>
+      </div>
+      <div class="ci-story-body">
+        <div class="ci-story-text"><strong>Real Madrid Stunned by Mallorca in La Liga Upset</strong><br>Real Madrid suffered a surprising 2-1 defeat to Mallorca, a result that could have significant implications for the La Liga title race. This unexpected loss will undoubtedly spark debate among fans.</div>
+        <div class="ci-story-tags"><span class="ci-src-tag ci-src-football">Fixtures/Results</span><span class="ci-src-tag ci-src-reddit">Reddit</span></div>
+      </div>
+    </div>
+<div class="ci-story">
+      <div class="ci-story-left">
+        <div class="ci-story-num">04</div>
+        <span class="ci-heat ci-heat-warm">Rising</span>
+      </div>
+      <div class="ci-story-body">
+        <div class="ci-story-text"><strong>West Ham vs. Wolves: Relegation Six-Pointer on Friday</strong><br>Bottom-of-the-table West Ham faces a crucial clash against fellow strugglers Wolves. This Friday night fixture is a must-win for both sides in their desperate fight to avoid the drop.</div>
+        <div class="ci-story-tags"><span class="ci-src-tag ci-src-football">Fixtures/Results</span><span class="ci-src-tag ci-src-news">News</span></div>
+      </div>
+    </div>
+<div class="ci-story">
+      <div class="ci-story-left">
+        <div class="ci-story-num">05</div>
+        <span class="ci-heat ci-heat-warm">Rising</span>
+      </div>
+      <div class="ci-story-body">
+        <div class="ci-story-text"><strong>Brighton Stun Arsenal in Women's FA Cup Shocker</strong><br>In a significant upset, Brighton has eliminated Arsenal from the Women's FA Cup, advancing to the semi-finals. This result highlights the competitive nature of women's football and Brighton's impressive form.</div>
+        <div class="ci-story-tags"><span class="ci-src-tag ci-src-news">News</span><span class="ci-src-tag ci-src-football">Fixtures/Results</span></div>
+      </div>
+    </div>
+<div class="ci-story">
+      <div class="ci-story-left">
+        <div class="ci-story-num">06</div>
+        <span class="ci-heat ci-heat-warm">Rising</span>
+      </div>
+      <div class="ci-story-body">
+        <div class="ci-story-text"><strong>Ibai Aguirre's Dream Real Sociedad Debut Celebrated</strong><br>Youngster Ibai Aguirre made his Real Sociedad debut, coming through the ranks to play for the first team. Heartwarming scenes followed as friends celebrated his achievement, showcasing a touching fan-player connection.</div>
+        <div class="ci-story-tags"><span class="ci-src-tag ci-src-reddit">Reddit</span><span class="ci-src-tag ci-src-youtube">YouTube</span></div>
+      </div>
+    </div>
+<div class="ci-story">
+      <div class="ci-story-left">
+        <div class="ci-story-num">07</div>
+        <span class="ci-heat ci-heat-cool">Steady</span>
+      </div>
+      <div class="ci-story-body">
+        <div class="ci-story-text"><strong>Oscar Forced into Early Retirement at 34</strong><br>Former Chelsea star Oscar has been forced to retire at the age of 34 due to a heart scare. This news is a somber reminder of the physical demands and risks involved in professional football.</div>
+        <div class="ci-story-tags"><span class="ci-src-tag ci-src-news">News</span><span class="ci-src-tag ci-src-reddit">Reddit</span></div>
+      </div>
+    </div>
+<div class="ci-story">
+      <div class="ci-story-left">
+        <div class="ci-story-num">08</div>
+        <span class="ci-heat ci-heat-cool">Steady</span>
+      </div>
+      <div class="ci-story-body">
+        <div class="ci-story-text"><strong>Eritrea Players Go Missing After AFCON Qualifiers</strong><br>A concerning report has emerged of seven Eritrea players going missing in South Africa after their AFCON qualifying matches. This incident raises serious questions about player welfare and safety.</div>
+        <div class="ci-story-tags"><span class="ci-src-tag ci-src-reddit">Reddit</span><span class="ci-src-tag ci-src-news">News</span></div>
+      </div>
+    </div>
 %%CI_PANEL_END%%
     </div>
   </div>
